@@ -1,0 +1,39 @@
+load(":atai_rules.bzl", "hello", "attrs_demo", "subproc", "deps_demo", "struct_demo", "atai_provider")
+
+# 1.
+hello(
+    name = "hello.txt",
+)
+
+# 2.
+TEMPLATE = "My name is {name} and I'm {age}\n"
+attrs_demo(
+    name = "attrs.txt",
+    template = TEMPLATE,
+    vars = {
+        "name": "Alan Tai",
+        "age": "39",
+    }
+)
+
+# 3. sub-processes
+subproc(
+    name = "subproc_demo",
+    count = 100,
+)
+
+# 4. dependencies
+deps_demo(
+    name = "copy_srcs",
+    srcs = [":hello.txt", ":subproc_demo"],
+)
+
+# 5. struct
+struct_demo(
+    name = "print_struct_values",
+)
+
+# 6. provider
+atai_provider(
+    name = "customize_provider"
+)

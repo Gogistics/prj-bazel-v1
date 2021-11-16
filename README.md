@@ -1,4 +1,8 @@
 # Bazel (WIP)
+Thanks to the Bazel community; I learned a lot from the contributors, especially John Millikin, Brentley Jones, Jay Conrod, Łukasz Tekieli, Davide Asnaghi, etc.
+
+Ref:
+- [Bazel Intro.](https://dev.to/davidb31/series/11649)
 
 ## Required Files
 - WORKSPACE
@@ -45,6 +49,8 @@ Ref:
 
 Ref:
 - [Remote caching](https://docs.bazel.build/versions/main/remote-caching.html)
+- [Bazel remote caching diagram](https://coggle.it/diagram/YZQ1Z2aAVbipHOb6/t/bazel-remote-caching)
+
 
 ### Remote Execution
 By default, Bazel executes builds and tests on your local machine. Remote execution of a Bazel build allows you to distribute build and test actions across multiple machines, such as a datacenter.
@@ -59,6 +65,7 @@ Remote execution provides the following benefits:
 Ref:
 - [Remote execution overview](https://docs.bazel.build/versions/main/remote-execution.html)
 - [Remote execution rules](https://docs.bazel.build/versions/main/remote-execution-rules.html)
+- [Bazel’s Remote Caching and Remote Execution Explained](https://brentley.dev/bazels-remote-caching-and-remote-execution-explained/)
 
 
 ## Platforms & Toolchains
