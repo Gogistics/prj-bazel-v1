@@ -4,29 +4,32 @@ Thanks to the Bazel community; I learned a lot from the contributors, especially
 Ref:
 - [Bazel Intro.](https://dev.to/davidb31/series/11649)
 
-## Required Files
+## Bazel runtime phases
+1. Load phase: pull all the required sources
+2. Analysis phase: analyze BUILD.bazel files
+3. Execution phase: run builds
+
+* Execution:
+    - Bazel breaks a build into separate steps, which are called **actions**. 
+    - Each action has inputs, output names, a command line, and environment variables. 
+    - Required inputs and expected outputs are declared explicitly for each action.
+    - These outputs consist of a list of output file names and the hashes of their contents.
+
+
+## Bazel Files
 - WORKSPACE
 A `workspace` is a root directory contains source files that you want to build; basically, workspace directory has a WORKSPACE file which may be empty or contains a bunch of references to external dependencies required to build the outputs.
 
 - BUILD/BUILD.bazel and .bzl
 **BUILD** files register/build targets by making calls to the rules defined in themselves. **.bzl** files provide definitions for constants, rules, macros, and functions. Native functions and native rules are global symbols in BUILD files. .bzl files need to load them using the native module. There are two syntactic restrictions in BUILD files: 1) declaring functions is illegal, and 2) *args and **kwargs arguments are not allowed.
 
-### General mechanism
+## General mechanism
 * Packages: a collection of relevant files and their dependencies
 * Targets: elements of a package
 * Labels: name of target
-* [rules](https://docs.bazel.build/versions/main/be/general.html): specifies relationships between input and output
-* [actions](https://docs.bazel.build/versions/main/skylark/lib/actions.html)
 
 
-### Skylark Globals
-* rule
-* select
-Ref:
-- [Globals](https://docs.bazel.build/versions/main/skylark/lib/globals.html)
-
-
-### query v.s. cquery v.s. aquery
+## Query (query, cquery, and aquery)
 * query: Traditional Bazel query runs on the post-loading phase target graph and therefore has no concept of configurations and their related concepts.
 * cquery (configurable query): cquery is a variant of query that correctly handles select() and build options' effects on the build graph. It achieves this by running over the results of Bazel's analysis phase, which integrates these effects. query, by constrast, runs over the results of Bazel's loading phase, before options are evaluated.
 * aquery (action graph query): The aquery command allows you to query for actions in your build graph. It operates on the post-analysis Configured Target Graph and exposes information about **Actions, Artifacts and their relationships**.
@@ -46,6 +49,50 @@ Ref:
 - [Visualize your build](https://blog.bazel.build/2015/06/17/visualize-your-build.html)
 
 ### Remote Caching
+* Caching:
+    - Disk caching
+    - Remote caching
+
+* Disk caching:
+    - Bazel can use a directory on the file system as a remote cache. 
+    - This is useful for sharing build artifacts when switching branches or working on multiple workspaces of the same project, such as multiple checkouts.
+    - Since Bazel does not garbage-collect the directory, you might want to automate a periodic cleanup of this directory. 
+    - Enable the disk cache as follows: `build --disk_cache=/path/to/build/cache`
+
+* Remote caching:
+    - Caching server
+    - Http caching protocol
+    - Authentication
+    - Debug remote caching
+
+Why remote caching and how it workss:
+    - Remote caching is utilized by the teams/developers and CI system in order to share the build and testing results; in other words, the build performance can be improved by reusable resources.
+    - Bazel breaks a build into separate steps, which are called **actions**. 
+    - Each action has inputs, output names, a command line, and environment variables. 
+    - Required inputs and expected outputs are declared explicitly for each action.
+    - You can set up a server to be a remote cache for build outputs, which are these action outputs. 
+    - These outputs consist of a list of output file names and the hashes of their contents. 
+    - With a remote cache, you can reuse build outputs from another user’s build rather than building each new output locally.
+
+
+The remote caching stores two types of data:
+    - The action cache, which is a map of action hashes to action result metadata.
+    - A content-addressable store (CAS) of output files. CAS is a way to store information so it can be retrieved based on its content, not its location
+
+
+What are required to use remote caching:
+    - Set up a server as the cache’s backend
+    - Configure the Bazel build to use the remote cache
+    - Use Bazel version 0.10.0 or later
+
+How a build uses remote caching:
+    - When you run a Bazel build that can read and write to the remote cache, the build follows these steps:
+    - Bazel creates the graph of targets that need to be built, and then creates a list of required actions. Each of these actions has declared inputs and output filenames
+    - Bazel checks your local machine for existing build outputs and reuses any that it finds
+    - Bazel checks the cache for existing build outputs. If the output is found, Bazel retrieves the output. This is a cache hit
+    - For required actions where the outputs were not found, Bazel executes the actions locally and creates the required build outputs
+    - New build outputs are uploaded to the remote cache
+
 
 Ref:
 - [Remote caching](https://docs.bazel.build/versions/main/remote-caching.html)
@@ -107,7 +154,21 @@ References:
 
 ---
 
-## Tips of building by Bazel
+## Starlark
+
+### Globals
+
+General:
+* [rules](https://docs.bazel.build/versions/main/be/general.html): specifies relationships between input and output
+* [actions](https://docs.bazel.build/versions/main/skylark/lib/actions.html)
+
+Ref:
+- [Globals](https://docs.bazel.build/versions/main/skylark/lib/globals.html)
+
+
+---
+
+## Tips
 
 ### Configurable Build Attributes
 
